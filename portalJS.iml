@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Tone" level="application" />
+    <orderEntry type="library" name="tonal" level="application" />
+    <orderEntry type="library" name="jquery-3.2.1" level="application" />
+    <orderEntry type="library" name="timbre" level="project" />
+    <orderEntry type="library" name="subcollider" level="project" />
+    <orderEntry type="library" name="webmidi" level="application" />
+  </component>
+</module>

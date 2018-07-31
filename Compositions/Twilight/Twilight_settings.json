@@ -1,0 +1,22 @@
+{
+  "midiOutHelp" : "MIDI out is the MIDI bus for sending info to BitWig Studio",
+  "midiOut" : "VirMIDI 1-1",
+  "midiMelodyChannelHelp" : "This is the MIDI bus for sending Guitar info to Bitwig Studio",
+  "midiMelodyChannel" : 1,
+  "midiImprovChannelHelp" : "This is the MIDI bus for sending Magenta return to Bitwig Studio",
+  "midiImprovChannel" : 2,
+  "midiBassChannelHelp" : "This is the MIDI bus for sending the Bass note to Bitwig Studio",
+  "midiBassChannel" : 3,
+  "midiLeadChannelHelp" : "This is the MIDI bus for sending the Lead note(s) to Bitwig Studio",
+  "midiLeadChannel" : 4,
+  "audioDirectory" : "../../Compositions/Twilight/Audio/",
+  "midiDirectory" : "../../Compositions/Twilight/MIDI/",
+  "midiControlChannel" : 16,
+  "midiCC1" : 1,
+  "midiCC2" : 2,
+  "midiCC3" : 3,
+  "midiCC4" : 4,
+  "midiCC5" : 5,
+  "midiCC6" : 6,
+
+}
