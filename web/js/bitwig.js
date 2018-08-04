@@ -107,7 +107,7 @@ $(function(){
 
     loadJSON(function(response){
       extChords = JSON.parse(response);
-    }, "../../Twilight/MIDI/extChords.json");
+    }, "../../Compositions/Twilight/MIDI/extChords.json");
 
     console.log(extChords);
 
