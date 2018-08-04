@@ -9,46 +9,13 @@ Twilight = function(){
 
     self.midiOut = "";
 
-    var chords = {
-      "EM+7" : ["E3", "B3", "G4", "D5", "A5"],
-      "Dm13" : ["D3", "B3", "F#4", "E5", "A5"],
-      "Bm13" : ["B2", "C4", "D4", "F#4", "E5", "A5"],
-      "CM9" : ["C3", "D4", "G4", "E5", "G5"]
-    }
-    var scores = [
-      [ {"time" : 0, "note" : "C1", "velocity": 0.9, "harmony" :"EM+7", "loopEnd": "4m"},
-        {"time" : "0:2", "note" : "C#1", "velocity": 0.5, "probability": 0.85, "harmony": "EM+7"},
-        {"time" : "0:3", "note" : "D1", "velocity": 0.5, "probability": 0.85, },
-        {"time" : "1:2", "note" : "D#1", "velocity": 0.5,"probability": 0.85},
-        {"time" : "1:3", "note" : "E1", "velocity": 0.5, "probability": 0.85},
-        {"time" : "2:1", "note" : "F1", "velocity": 0.5,"probability": 0.85},
-        {"time" : "2:2", "note" : "F#1", "velocity": 0.5, "probability": 0.85},
-        {"time" : "3:0", "note" : "D#1", "velocity": 0.5, "probability": 0.85},
-        {"time" : "3:2", "note" : "G1", "velocity": 0.5, "probability": 0.85},
-        {"time": "3:3", "note": null, "change": true}
-      ],
-      [ {"time" : "0:0", "note" : "C#1", "velocity": 0.9, "loopEnd": "2m"},
-        {"time" : "0:2", "note" : "C1", "velocity": 0.5, "probability": 0.85},
-        {"time" : "1:0", "note" : "D#1", "velocity": 0.5, "probability": 0.85},
-        {"time" : "1:2", "note" : "D1", "velocity": 0.5,"probability": 0.85},
-        {"time": "1:3", "note": null, "change": true}
-      ],
-      [
-        {"time" : "0:0", "note" : "C2", "velocity": 0.9, "loopEnd": "2m"},
-        {"time" : "1:0", "note" : "C#2", "velocity": 0.9},
-        {"time": "1:3", "note": null, "change": true}
-      ],
-      [
-        {"time" : "0:0", "note" : "E1", "velocity": 0.9, "loopEnd": "4m"},
-        {"time" : "0:2", "note" : "F1", "velocity": 0.5, "probability": 0.85},
-        {"time" : "1:0", "note" : "D#1", "velocity": 0.5, "probability": 0.85},
-        {"time" : "2:0", "note" : "F#1", "velocity": 0.5,"probability": 0.85},
-        {"time" : "2:2", "note" : "G1", "velocity": 0.5,"probability": 0.85},
-        {"time" : "3:0", "note" : "A1", "velocity": 0.5,"probability": 0.85},
-        {"time": "3:3", "note": null, "change": true}
-      ]
-    ];
-
+    // var chords = {
+    //   "EM+7" : ["E3", "B3", "G4", "D5", "A5"],
+    //   "Dm13" : ["D3", "B3", "F#4", "E5", "A5"],
+    //   "Bm13" : ["B2", "C4", "D4", "F#4", "E5", "A5"],
+    //   "CM9" : ["C3", "D4", "G4", "E5", "G5"]
+    // }
+    self.scores;
 
     var seqChoice = 0;
 };

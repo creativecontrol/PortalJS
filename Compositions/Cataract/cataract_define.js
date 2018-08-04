@@ -9,16 +9,12 @@ Cataract = function(){
     let self = this;
 
     self.configFile = "../../Compositions/Cataract/Cataract_settings.json";
+    self.isPlaying = false;
 
     self.midiOut;
     self.midiControlChannel;
     // control gates for the music channels
-    self.midiCC1;
-    self.midiCC2;
-    self.midiCC3;
-    self.midiCC4;
-    self.midiCC5;
-    self.midiCC6;
+    self.gateNotes;
     self.bitwigSceneNumber;
 
     self.config();
@@ -31,22 +27,17 @@ Cataract.prototype.config = function(){
 
   loadJSON(function(configuration){
     let config = JSON.parse(configuration);
-    console.log(config);
+    console.debug(config);
     self.midiOut = config.midiOut;
     self.midiControlChannel = config.midiControlChannel;
-    self.midiCC1 = config.midiCC1;
-    self.midiCC2 = config.midiCC2;
-    self.midiCC3 = config.midiCC3;
-    self.midiCC4 = config.midiCC4;
-    self.midiCC5 = config.midiCC5;
-    self.midiCC6 = config.midiCC6;
+    self.gateNotes = config.gateNotes;
     self.bitwigSceneNumber = config.bitwigSceneNumber;
     self.sensorGroups = config.sensorGroups;
     self.sensorCutoff = config.sensorCutoff;
 
   }, self.configFile);
 
-  console.log(self.sensorGroups);
+  console.debug(self.sensorGroups);
 
 };
 
@@ -55,11 +46,14 @@ Cataract.prototype.start = function(){
 
     //send start to BitWig Scene
 
+    self.isPlaying = true;
 };
 
 Cataract.prototype.stop = function (){
     let self = this;
+    self.isPlaying = false;
 
+    //turn off BitWig Scene
 };
 
 Cataract.prototype.free = function (){
@@ -69,21 +63,26 @@ Cataract.prototype.free = function (){
 Cataract.prototype.initMidi = function(){
   let self = this;
 
+  // setup control channels
+  self.gateChannels = [self.midiCC1, self.midiCC2];
+
   WebMidi.enable(err => {
       if (err) {
           console.error('WebMidi could not be enabled', err);
           return;
       }
-      console.log(WebMidi.outputs);
+      console.debug(WebMidi.outputs);
       self.midiOut = WebMidi.getOutputByName(self.midiOut);
   });
 };
 
 Cataract.prototype.sensors = function(){
   let self = this;
-  console.log("adding event listener");
+  console.debug("adding event listener");
   window.addEventListener("sensors", function(e){
-    self.envelopes(e);
+    if(self.isPlaying){
+      self.envelopes(e);
+    }
   });
 };
 
@@ -94,7 +93,7 @@ Cataract.prototype.envelopes = function(sensor){
   let activeZone = null;
   let envState = 0;
 
-//  console.log("cataract got sensor message");
+//  console.debug("cataract got sensor message");
 
   self.sensorGroups.forEach(function(group){
     if(sensorNumber >= group[0] && sensorNumber <= group[1]){
@@ -106,12 +105,11 @@ Cataract.prototype.envelopes = function(sensor){
   //if the value is within a cutoff range then send a value
   let sensorValue = sensor.detail.value;
   if(sensorValue != BADDATA && sensorValue < self.sensorCutoff){
-    console.log("sending MIDI out " + activeZone + " " + sensorValue + " " + self.midiControlChannel);
-
-    console.log(self.midiOut);
-    self.midiOut.playNote(activeZone, 16);
+    console.debug("sending MIDI out " + activeZone + " " + sensorValue + " " + self.midiControlChannel);
+    console.debug(self.midiOut);
+    self.midiOut.playNote(self.gateNotes[activeZone], 16);
   } else if {
-    self.midiOut.stopNote(activeZone, 16);
+    self.midiOut.stopNote(self.gateNotes[activeZone], 16);
   }
 
 };
