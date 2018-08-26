@@ -2,7 +2,9 @@
   "midiOutHelp" : "MIDI out is the MIDI bus for sending info to BitWig Studio",
   "midiOut" : "VirMIDI 1-1",
   "midiMelodyChannelHelp" : "This is the MIDI bus for sending Guitar info to Bitwig Studio",
+  "melodyTimeOffest" : 0,
   "midiMelodyChannel" : 1,
+  "melodyTriggerDuration" : 100,
   "midiImprovChannelHelp" : "This is the MIDI bus for sending Magenta return to Bitwig Studio",
   "midiImprovChannel" : 2,
   "midiBassChannelHelp" : "This is the MIDI bus for sending the Bass note to Bitwig Studio",
@@ -11,12 +13,11 @@
   "midiLeadChannel" : 4,
   "audioDirectory" : "../../Compositions/Twilight/Audio/",
   "midiDirectory" : "../../Compositions/Twilight/MIDI/",
+  "scoreFile" : "Twilight_score.json",
   "midiControlChannel" : 16,
-  "midiCC1" : 1,
-  "midiCC2" : 2,
-  "midiCC3" : 3,
-  "midiCC4" : 4,
-  "midiCC5" : 5,
-  "midiCC6" : 6,
+  "neuralNet" : "https://storage.googleapis.com/download.magenta.tensorflow.org/tfjs_checkpoints/music_rnn/chord_pitches_improv",
+  "temperature" : 0.85,
+  "key" : "Em",
+  "tempo" : 110
 
 }

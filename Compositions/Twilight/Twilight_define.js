@@ -1,132 +1,188 @@
-Twilight = function(){
-    let self = this;
-
-    self.configFile = "./Cataract_settings.json";
-
-    self.audioDirectory = "";
-    self.midiDirectory = "";
-    self.samplesDirectory = "";
-
-    self.midiOut = "";
-
-    // var chords = {
-    //   "EM+7" : ["E3", "B3", "G4", "D5", "A5"],
-    //   "Dm13" : ["D3", "B3", "F#4", "E5", "A5"],
-    //   "Bm13" : ["B2", "C4", "D4", "F#4", "E5", "A5"],
-    //   "CM9" : ["C3", "D4", "G4", "E5", "G5"]
-    // }
-    self.scores;
-
-    var seqChoice = 0;
-};
-
-Twilight.prototype.config = function(){
+var Twilight = function () {
   let self = this;
 
-  let config = loadJSON(function(response){
-    return JSON.parse(response);
-  }, "./Twilight_settings.json");
+  self.configFile = '../../Compositions/Twilight/Twilight_settings.json';
 
-  self.midiOut = config.midiOut;
-  self.audioDirectory = config.audioDirectory;
-  self.midiDirectory = config.midiDirectory;
+  self.audioDirectory = '';
+  self.midiDirectory = '';
+  self.samplesDirectory = '';
+
+  self.midiOut = '';
+  self.melodyTimeOffset = '';
+  self.midiMelodyChannel = '';
+  self.midiImprovChannel = '';
+  self.midiBassChannel = '';
+  self.midiLeadChannel = '';
+
+  self.melodyTriggerDuration = '';
+
+  self.neuralNet = '';
+  self.temperature = '';
+  self.key = '';
+  self.tempo = '';
+
+  self.scoreFile = '';
+  self.scores = '';
+  self.perform = '';
+  self.lastHarmony = null;
+
+  self.improvisor = '';
+
+  self.seqChoice = 0;
+
+  self.init();
 };
 
-Twilight.prototype.initMidi = function(){
+Twilight.prototype.init = function () {
   let self = this;
 
-  WebMidi.enable(err => {
-      if (err) {
-          console.error('WebMidi could not be enabled', err);
-          return;
-      }
+  self.config();
+  self.loadScore();
+  self.scoreInit();
+  self.initMidi();
+  self.initImprov();
+};
 
-      console.log(WebMidi.outputs);
-      self.midiOut = WebMidi.outputs[self.midiOut];
+Twilight.prototype.start = function () {
+  let self = this;
+
+  self.perform.start();
+};
+
+Twilight.prototype.stop = function () {
+  let self = this;
+
+  self.perform.stop();
+};
+
+Twilight.prototype.config = function () {
+  let self = this;
+
+  loadJSON(function (configuration) {
+    let config = JSON.parse(configuration);
+
+    self.audioDirectory = config.audioDirectory;
+    self.midiDirectory = config.midiDirectory;
+
+    self.midiOut = config.midiOut;
+    self.melodyTimeOffest = config.melodyTimeOffest;
+    self.midiMelodyChannel = config.midiMelodyChannel;
+    self.midiImprovChannel = config.midiImprovChannel;
+    self.midiBassChannel = config.midiBassChannel;
+    self.midiLeadChannel = config.midiLeadChannel;
+
+    self.melodyTriggerDuration = config.melodyTriggerDuration;
+
+    self.neuralNet = config.neuralNet;
+    self.temperature = config.temperature;
+    self.key = config.key;
+    self.tempo = config.tempo;
+
+    self.scoreFile = config.scoreFile;
+  }, self.configFile);
+};
+
+Twilight.prototype.initImprov = function () {
+  let self = this;
+
+  console.warn('init improv: ' + self.midiOut);
+
+  self.improvisor = new Improvisor({
+    key: self.key,
+    tempo: self.tempo,
+    temperature: self.temperature,
+    neuralNet: self.neuralNet,
+    improvOut: self.midiOutput,
+    improvChannel: self.midiImprovChannel,
+    bassOut: self.midiOutput,
+    bassChannel: self.midiBassChannel,
+    leadOut: self.midiOutput,
+    leadChannel: self.midiLeadChannel,
+    parent: self
   });
 };
 
-    function humanKeyUp(msg){
+Twilight.prototype.initMidi = function () {
+  let self = this;
 
+  WebMidi.enable(err => {
+    if (err) {
+      console.error('WebMidi could not be enabled', err);
+      return;
     }
 
-    function humanKeyDown(msg){
+    console.debug(WebMidi.outputs);
+    self.midiOutput = WebMidi.getOutputByName(self.midiOut);
+  });
 
+};
+
+Twilight.prototype.loadScore = function () {
+  let self = this;
+
+  loadJSON(function (score) {
+    self.scores = JSON.parse(score);
+  }, self.midiDirectory + self.scoreFile);
+};
+
+// This is the main melody guitar part played using various Gutar samples
+Twilight.prototype.scoreInit = function () {
+  let self = this;
+
+  self.perform = new Tone.Part(function (time, value) {
+    console.debug(value);
+    let part = this;
+
+    if (value.note) {
+      self.midiOutput.playNote(value.note, 1, {duration: self.melodyTriggerDuration, time: self.melodyTimeOffest});
+      console.debug(value.note);
     }
 
+    if (value.harmony) {
+      // process the harmony field and send it to the magenta improvisor
+      console.debug(value.harmony);
+      console.debug(self.scores.score.chords);
+      console.debug(self.scores.score.chords[value.harmony]);
 
+      // remove the notes from the previous harmony
+      if (self.lastHarmony) {
+        // self.scores.score.chords[self.lastHarmony].forEach((note) => {
+        //   self.improvisor.removeNote(note);
+        // });
+        self.improvisor.removeNote(self.lastHarmony);
+      }
 
+      // for each of the notes listed in the chord harmony, add a note to the Improvisor
+      // self.scores.score.chords[value.harmony].forEach((note) => {
+      //   self.improvisor.inputNote(note);
+      // });
 
-    var part = new Tone.Part(function (time, value) {
-        console.log(value);
-        self = this;
+      self.improvisor.inputNote(self.scores.score.chords[value.harmony]);
 
-        if(value.note !== null){
-          m_out.playNote(value.note, 1, {duration: 500});
-          console.log(value.note);
-        }
+      self.lastHarmony = self.scores.score.chords[value.harmony];
+    }
 
-        if(value.change){
-          seqChoice = _.random(0, scores.length-1);
-          self.removeAll();
+    if (value.change) {
+      self.seqChoice = _.random(0, self.scores.score.notes.length - 1);
+      part.removeAll();
+      for (var i = 0; i < self.scores.score.notes[self.seqChoice].length; i++) {
+        part.add(self.scores.score.notes[self.seqChoice][i]);
+      }
 
-          for (var i = 0; i < scores[seqChoice].length; i++){
-            self.add(scores[seqChoice][i]);
-          }
+      part.loopEnd = self.scores.score.notes[self.seqChoice][0].loopEnd;
 
-          self.loopEnd = scores[seqChoice][0].loopEnd;
+      console.debug(self.seqChoice);
+    }
+  }, [
+    {'time': '0:0', 'change': true}
+  ]);
 
-          console.log(seqChoice);
-          console.log(self);
-        }
+  self.perform.loop = true;
+  self.perform.loopEnd = '1m';
+  Tone.Transport.bpm.value = self.tempo;
+};
 
-    }, [
-      {"time" : "0:0", "note" : "C2", "velocity": 0.9, "loopEnd": "2m"},
-      {"time" : "1:0", "note" : "C#2", "velocity": 0.9},
-      {"time": "1:3", "note": null, "change": true}
-    ]);
-
-    var extChords = {};
-
-    loadJSON(function(response){
-      extChords = JSON.parse(response);
-    }, "../../Twilight/MIDI/extChords.json");
-
-    console.log(extChords);
-
-    var dur = Tone.Time("1m").toMilliseconds();
-    console.log("duration: " + dur);
-
-    var partExt = new Tone.Part(function(time, value){
-        m_out.playNote(value.name, 2, {duration: Tone.Time("1m").toMilliseconds()});
-    }, extChords.tracks[0].notes);
-
-    var oscill = new Tone.Oscillator().toMaster();
-    oscill.start(0);
-
-    setTimeout(function(){
-        part.loop = true;
-        part.loopEnd = "4m";
-        part.start();
-        console.log(part);
-
-        partExt.loop = true;
-        partExt.loopEnd = "5m";
-        partExt.start();
-
-        Tone.Transport.start();
-
-        Tone.Transport.scheduleRepeat(function(){
-            //console.log("hi");
-            //console.log("progress: " + part.progress);
-        }, 1, 0);
-
-        console.log(Tone.Transport.state);
-
-    }, 2000);
-
-    setInterval(function () {
-        //console.log("bang");
-    }, 1000);
-
-});
+Twilight.prototype.improvEvents = function (note, channel, duration) {
+  let self = this;
+  self.midiOutput.playNote(note, channel, {duration: duration});
+};

@@ -3,9 +3,12 @@ $(function(){
     const MAX_NOTE = 84;
     const KEY = 'Em';
 
+//    var m_out;
+
     // Using the Improv RNN pretrained model from https://github.com/tensorflow/magenta/tree/master/magenta/models/improv_rnn
     let rnn = new mm.MusicRNN(
-        'https://storage.googleapis.com/download.magenta.tensorflow.org/tfjs_checkpoints/music_rnn/chord_pitches_improv'
+       '../../chord_pitches_improv_ckpt'
+        // 'https://storage.googleapis.com/download.magenta.tensorflow.org/tfjs_checkpoints/music_rnn/chord_pitches_improv'
     );
 
     let temperature = 1.1;
@@ -201,19 +204,26 @@ $(function(){
     function humanKeyDown(note, velocity = 0.7) {
         if (note < MIN_NOTE || note > MAX_NOTE) return;
         updateChord({ add: note });
+        console.log("human key down");
     }
 
     function humanKeyUp(note) {
         if (note < MIN_NOTE || note > MAX_NOTE) return;
         m_out.sendStop();
         updateChord({ remove: note });
+
+        console.log("human key up");
     }
 
     function machineKeyDown(note, time) {
+        console.log("machine key down");
         if (note < MIN_NOTE || note > MAX_NOTE) return;
-        // console.log(note);
+        console.log(note);
+        console.log(m_out);
 
-        m_out.playNote(note, 1, {duration: 500});
+        let dur = Math.floor(Math.random() * 700)+200;
+
+        m_out.playNote(note, 1, {duration: dur});
         if(tonic_m !== tonic_last){
 
             m_out.playNote(drop_octave(tonic_m), 2, {duration:750});
@@ -234,14 +244,25 @@ $(function(){
         }
         //document.querySelector('.midi-not-supported').style.display = 'none';
 
-        let input = WebMidi.inputs[0];
+        console.log(WebMidi.inputs);
+        console.log(WebMidi.outputs);
+
+        let input = WebMidi.getInputByName('VirMIDI 1-0');
         input.addListener('noteon', 'all', e => {
+            //console.log(WebMidi.inputs);
             humanKeyDown(e.note.number, e.velocity);
-            // console.log(e.note.number, e.velocity);
+            console.log(e.note.number, e.velocity);
+
+            let dur = Math.floor(Math.random() * 1000);
+
+            m_out.playNote(drop_octave(e.note.number), 1, {duration : 1200});
         });
         input.addListener('noteoff', 'all', e => humanKeyUp(e.note.number));
 
-        m_out = WebMidi.outputs[1];
+        m_out = WebMidi.getOutputByName('VirMIDI 1-1');
+        // m_out = WebMidi.getOutputByName('USB Device 0x499:0x2003 MIDI 1');
+
+        console.log(m_out);
     });
 
     // Startup
