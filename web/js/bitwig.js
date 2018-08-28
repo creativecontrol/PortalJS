@@ -62,25 +62,25 @@ $(function(){
         let input = WebMidi.inputs[0];
         input.addListener('noteon', 'all', e => {
             humanKeyDown(e.note.number, e.velocity);
-            // console.log(e.note.number, e.velocity);
+            // console.debug(e.note.number, e.velocity);
         });
         input.addListener('noteoff', 'all', e => humanKeyUp(e.note.number));
 
-        console.log(WebMidi.outputs);
+        console.debug(WebMidi.outputs);
         m_out = WebMidi.outputs[1];
 
-        console.log(m_out);
+        console.debug(m_out);
     });
 
 
 
     var part = new Tone.Part(function (time, value) {
-        console.log(value);
+        console.debug(value);
         self = this;
 
         if(value.note !== null){
           m_out.playNote(value.note, 1, {duration: 500});
-          console.log(value.note);
+          console.debug(value.note);
         }
 
         if(value.change){
@@ -93,8 +93,8 @@ $(function(){
 
           self.loopEnd = scores[seqChoice][0].loopEnd;
 
-          console.log(seqChoice);
-          console.log(self);
+          console.debug(seqChoice);
+          console.debug(self);
         }
 
     }, [
@@ -109,10 +109,10 @@ $(function(){
       extChords = JSON.parse(response);
     }, "../../Compositions/Twilight/MIDI/extChords.json");
 
-    console.log(extChords);
+    console.debug(extChords);
 
     var dur = Tone.Time("1m").toMilliseconds();
-    console.log("duration: " + dur);
+    console.debug("duration: " + dur);
 
     var partExt = new Tone.Part(function(time, value){
         m_out.playNote(value.name, 2, {duration: Tone.Time("1m").toMilliseconds()});
@@ -125,7 +125,7 @@ $(function(){
         part.loop = true;
         part.loopEnd = "4m";
         part.start();
-        console.log(part);
+        console.debug(part);
 
         partExt.loop = true;
         partExt.loopEnd = "5m";
@@ -134,16 +134,16 @@ $(function(){
         Tone.Transport.start();
 
         Tone.Transport.scheduleRepeat(function(){
-            //console.log("hi");
-            //console.log("progress: " + part.progress);
+            //console.debug("hi");
+            //console.debug("progress: " + part.progress);
         }, 1, 0);
 
-        console.log(Tone.Transport.state);
+        console.debug(Tone.Transport.state);
 
     }, 2000);
 
     setInterval(function () {
-        //console.log("bang");
+        //console.debug("bang");
     }, 1000);
 
 });

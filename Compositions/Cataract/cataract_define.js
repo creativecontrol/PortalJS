@@ -9,17 +9,16 @@ Cataract = function(){
     let self = this;
 
     self.configFile = "../../Compositions/Cataract/Cataract_settings.json";
+    self.isPlaying = false;
 
-    self.midiOut;
+    self.midiOut = '';
+    self.midiOuput = '';
     self.midiControlChannel;
     // control gates for the music channels
-    self.midiCC1;
-    self.midiCC2;
-    self.midiCC3;
-    self.midiCC4;
-    self.midiCC5;
-    self.midiCC6;
+    self.gateNotes;
     self.bitwigSceneNumber;
+
+    self.activeZones = [];
 
     self.config();
     self.initMidi();
@@ -31,23 +30,21 @@ Cataract.prototype.config = function(){
 
   loadJSON(function(configuration){
     let config = JSON.parse(configuration);
-    console.log(config);
+    console.debug(config);
     self.midiOut = config.midiOut;
     self.midiControlChannel = config.midiControlChannel;
-    self.midiCC1 = config.midiCC1;
-    self.midiCC2 = config.midiCC2;
-    self.midiCC3 = config.midiCC3;
-    self.midiCC4 = config.midiCC4;
-    self.midiCC5 = config.midiCC5;
-    self.midiCC6 = config.midiCC6;
+    self.gateNotes = config.gateNotes;
     self.bitwigSceneNumber = config.bitwigSceneNumber;
     self.sensorGroups = config.sensorGroups;
     self.sensorCutoff = config.sensorCutoff;
 
   }, self.configFile);
 
-  console.log(self.sensorGroups);
+  console.debug(self.sensorGroups);
 
+  self.sensorGroups.forEach(function() {
+    self.activeZones.push(0);
+  });
 };
 
 Cataract.prototype.start = function(){
@@ -55,11 +52,14 @@ Cataract.prototype.start = function(){
 
     //send start to BitWig Scene
 
+    self.isPlaying = true;
 };
 
 Cataract.prototype.stop = function (){
     let self = this;
+    self.isPlaying = false;
 
+    //turn off BitWig Scene
 };
 
 Cataract.prototype.free = function (){
@@ -69,21 +69,29 @@ Cataract.prototype.free = function (){
 Cataract.prototype.initMidi = function(){
   let self = this;
 
+  // setup control channels
+  self.gateChannels = [self.midiCC1, self.midiCC2];
+
   WebMidi.enable(err => {
       if (err) {
           console.error('WebMidi could not be enabled', err);
           return;
       }
       console.log(WebMidi.outputs);
-      self.midiOut = WebMidi.getOutputByName(self.midiOut);
+      self.midiOutput = WebMidi.getOutputByName(self.midiOut);
+      console.log(self.midiOutput);
   });
+
 };
 
 Cataract.prototype.sensors = function(){
   let self = this;
-  console.log("adding event listener");
+  console.debug("adding event listener");
   window.addEventListener("sensors", function(e){
-    self.envelopes(e);
+    // console.debug(e);
+    if(self.isPlaying){
+      self.envelopes(e);
+    }
   });
 };
 
@@ -91,27 +99,34 @@ Cataract.prototype.envelopes = function(sensor){
   let self = this;
 
   let sensorNumber = sensor.detail.number;
-  let activeZone = null;
+  let activeZone = 0;
   let envState = 0;
 
-//  console.log("cataract got sensor message");
+//  console.debug("cataract got sensor message");
 
-  self.sensorGroups.forEach(function(group){
+  // console.log(sensorNumber);
+
+  self.sensorGroups.forEach(function(group, idx){
     if(sensorNumber >= group[0] && sensorNumber <= group[1]){
-      activeZone = sensorNumber;
+      activeZone = idx;
       return;
     };
   });
 
-  //if the value is within a cutoff range then send a value
-  let sensorValue = sensor.detail.value;
-  if(sensorValue != BADDATA && sensorValue < self.sensorCutoff){
-    console.log("sending MIDI out " + activeZone + " " + sensorValue + " " + self.midiControlChannel);
+  // console.log(activeZone);
 
-    console.log(self.midiOut);
-    self.midiOut.playNote(activeZone, 16);
-  } else if {
-    self.midiOut.stopNote(activeZone, 16);
-  }
+   //if the value is within a cutoff range then send a value
+   let sensorValue = sensor.detail.value;
+   if(sensorValue !== BADDATA && sensorValue < self.sensorCutoff){
+     console.log("sending MIDI out " + self.gateNotes[activeZone] + " " + sensorValue + " " + self.midiControlChannel);
+     //  console.debug(self.midiOut);
+     self.midiOutput.playNote(self.gateNotes[activeZone], 16);
+     self.activeZones[activeZone] = 1;
+   } else {
+     if(self.activeZones[activeZone] == 1){
+       self.midiOutput.stopNote(self.gateNotes[activeZone], 16);
+       self.activeZones[activeZone] = 0;
+     }
+   }
 
 };

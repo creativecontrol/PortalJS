@@ -4,7 +4,7 @@
 
 //     "use strict";
 
-const BADDATA = 999;
+const BADDATA = 999.00;
 
 
 oscHandler = function(){
@@ -16,7 +16,7 @@ oscHandler = function(){
     this.oscPort.open();
 
     this.oscPort.socket.onmessage = function (e) {
-        console.log("message", e);
+        console.debug("message", e);
     };
 };
 
@@ -35,10 +35,10 @@ oscHandler.prototype.event_create = function(oscMessage){
     let sensor = oscMessage.args[0];
     let value = oscMessage.args[1];
 
-    console.log(address + " " + sensor + " " + value);
+    console.debug(address + " " + sensor + " " + value);
 
     if(address === '/sensors') {
-       console.log("sending event");
+       console.debug("sending event");
         window.dispatchEvent(new CustomEvent("sensors", {detail: {
           number : sensor,
           value : value }

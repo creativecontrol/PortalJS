@@ -23,7 +23,7 @@ var getIPAddresses = function () {
 // Bind to a UDP socket to listen for incoming OSC events.
 var udpPort = new osc.UDPPort({
     localAddress: "0.0.0.0",
-    localPort: 60061
+    localPort: 3333
 });
 
 udpPort.on("ready", function () {
@@ -36,7 +36,7 @@ udpPort.on("ready", function () {
 });
 
 udpPort.on("message", function(oscMessage){
-  console.log(oscMessage);
+  //console.log(oscMessage);
 });
 
 udpPort.open();

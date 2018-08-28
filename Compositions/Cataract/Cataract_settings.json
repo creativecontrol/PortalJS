@@ -1,19 +1,14 @@
 {
   "midiOutHelp" : "MIDI out is the MIDI bus for sending info to BitWig Studio",
-  "midiOut" : "VirMIDI 1-0",
+  "midiOut" : "VirMIDI 0-0",
   "midiMelodyChannel" : 1,
   "midiBassChannel" : 2,
   "audioDirectory" : "../../Compositions/Cataract/Audio/",
   "midiDirectory" : "../../Compositions/Cataract/MIDI/",
   "midiControlChannel" : 16,
-  "midiCC1" : 1,
-  "midiCC2" : 2,
-  "midiCC3" : 3,
-  "midiCC4" : 4,
-  "midiCC5" : 5,
-  "midiCC6" : 6,
+  "gateNotes" : [1, 2,3, 4, 5, 6],
   "bitwigSceneNumber" : 2,
   "bitwigOSCPort" : 8000,
   "sensorGroups" : [[1,10], [11,19], [20,28], [29,37], [38,46], [47,56]],
-  "sensorCutoff" : 3.5
+  "sensorCutoff" : 0.8
 }
