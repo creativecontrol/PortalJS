@@ -15,7 +15,7 @@
   "midiDirectory" : "../../Compositions/Twilight/MIDI/",
   "scoreFile" : "Twilight_score.json",
   "midiControlChannel" : 16,
-  "neuralNet" : "https://storage.googleapis.com/download.magenta.tensorflow.org/tfjs_checkpoints/music_rnn/chord_pitches_improv",
+  "neuralNet" : "./magenta/chord_pitches_improv",
   "temperature" : 0.85,
   "key" : "Em",
   "tempo" : 110
