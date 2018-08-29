@@ -135,6 +135,8 @@ Improvisor.prototype.buildNoteSequence = function (seed) {
 
   // pull the top three notes as the lead line
   self.leadSet = seed.slice(self.LEAD_NOTES).map(kernel => kernel.note);
+  // Set the leadNote array in the parent object. Need a better way to call this (more generic).
+  self.parent.leadSet = self.leadSet;
 
   return mm.sequences.quantizeNoteSequence(
     {
@@ -274,7 +276,7 @@ Improvisor.prototype.updateChord = function ({ add = null, remove = null }) {
 Improvisor.prototype.inputNote = function (note, velocity = 0.7) {
   let self = this;
 
-  // if (note < self.MIN_NOTE || note > self.MAX_NOTE) return;
+  if (note < self.MIN_NOTE || note > self.MAX_NOTE) return;
   self.updateChord({ add: note });
 };
 
@@ -283,7 +285,7 @@ Improvisor.prototype.inputNote = function (note, velocity = 0.7) {
 Improvisor.prototype.removeNote = function (note) {
   let self = this;
 
-  // if (note < self.MIN_NOTE || note > self.MAX_NOTE) return;
+  if (note < self.MIN_NOTE || note > self.MAX_NOTE) return;
   // NOTE: may not need to stop notes since I'm giving them a duration in playNotes
   // this.improvOut.stopNote('all', self.improvChannel);
   // this.bassOut.stopNote('all', self.improvChannel);
@@ -312,7 +314,8 @@ Improvisor.prototype.playNotes = function (note, time) {
     self.midiToParent(self.dropOctave(self.tonicM), self.bassChannel, 1250);
 
     // TODO: activate this via sensor input
-    self.midiToParent(self.leadSet[Math.floor(Math.random() * self.leadSet.length)], self.leadChannel, 1500);
+    //self.midiToParent(self.leadSet[Math.floor(Math.random() * self.leadSet.length)], self.leadChannel, 1500);
+    
     self.tonicLast = self.tonicM;
   }
 };

@@ -14,6 +14,16 @@ var Twilight = function () {
   self.midiImprovChannel = '';
   self.midiBassChannel = '';
   self.midiLeadChannel = '';
+  self.leadDuration = '';
+
+  self.gateNotes = '';
+  self.sensorGroups = '';
+  self.sensorCutoff = '';
+  self.activeZones = [];
+  self.zoneLock = [];
+  self.zoneLockTime = '';
+
+  self.leadSet = '';
 
   self.melodyTriggerDuration = '';
 
@@ -28,6 +38,7 @@ var Twilight = function () {
   self.lastHarmony = null;
 
   self.improvisor = '';
+  self.isPlaying = false;
 
   self.seqChoice = 0;
 
@@ -38,6 +49,7 @@ Twilight.prototype.init = function () {
   let self = this;
 
   self.config();
+  self.sensors();
   self.loadScore();
   self.scoreInit();
   self.initMidi();
@@ -47,12 +59,15 @@ Twilight.prototype.init = function () {
 Twilight.prototype.start = function () {
   let self = this;
 
+  self.isPlaying = true;
+  console.warn(Tone.now());
   self.perform.start();
 };
 
 Twilight.prototype.stop = function () {
   let self = this;
-
+  
+  self.isPlaying = false;
   self.perform.stop();
 };
 
@@ -71,6 +86,12 @@ Twilight.prototype.config = function () {
     self.midiImprovChannel = config.midiImprovChannel;
     self.midiBassChannel = config.midiBassChannel;
     self.midiLeadChannel = config.midiLeadChannel;
+    self.leadDuration = config.leadDuration;
+
+    self.gateNotes = config.gateNotes;
+    self.sensorGroups = config.sensorGroups;
+    self.sensorCutoff = config.sensorCutoff;
+    self.zoneLockTime = config.zoneLockTime;
 
     self.melodyTriggerDuration = config.melodyTriggerDuration;
 
@@ -81,6 +102,11 @@ Twilight.prototype.config = function () {
 
     self.scoreFile = config.scoreFile;
   }, self.configFile);
+
+  self.sensorGroups.forEach(function() {
+    self.activeZones.push(0);
+    self.zoneLock.push(0);
+  });
 };
 
 Twilight.prototype.initImprov = function () {
@@ -186,4 +212,55 @@ Twilight.prototype.scoreInit = function () {
 Twilight.prototype.improvEvents = function (note, channel, duration) {
   let self = this;
   self.midiOutput.playNote(note, channel, {duration: duration});
+};
+
+Twilight.prototype.sensors = function(){
+  let self = this;
+  console.debug("adding event listener");
+  window.addEventListener("sensors", function(e){
+    // console.debug(e);
+    if(self.isPlaying){
+      self.chooseLead(e);
+    }
+  });
+};
+
+Twilight.prototype.chooseLead = function(sensor){
+  let self = this;
+
+  let sensorNumber = sensor.detail.number;
+  let activeZone = 0;
+  let envState = 0;
+
+//  console.debug("cataract got sensor message");
+
+  // console.log(sensorNumber);
+
+  self.sensorGroups.forEach(function(group, idx){
+    if(sensorNumber >= group[0] && sensorNumber <= group[1]){
+      activeZone = idx;
+      return;
+    };
+  });
+
+  //console.warn(activeZone);
+
+   //if the value is within a cutoff range then send a value
+   let sensorValue = sensor.detail.value;
+   if(sensorValue !== BADDATA && sensorValue < self.sensorCutoff && self.activeZones[activeZone] == 0){
+     console.warn("sending MIDI out " + self.gateNotes[activeZone] + " " + sensorNumber + " " + sensorValue);
+     //  console.debug(self.midiOut);
+     let selectedNote = self.leadSet[Math.floor(Math.random() * self.leadSet.length)];
+     console.warn(selectedNote);
+     self.midiOutput.playNote(selectedNote, self.midiLeadChannel[activeZone], {duration:self.leadDuration});
+     self.activeZones[activeZone] = 1;	
+     self.zoneLock[activeZone] = Tone.now();
+   } else {
+     if(self.activeZones[activeZone] == 1 && Tone.now() > (self.zoneLock[activeZone] + self.zoneLockTime)){
+       self.activeZones[activeZone] = 0;
+       self.zoneLock[activeZone] = 0;
+     }
+   }
+
+  
 };
